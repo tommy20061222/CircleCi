@@ -15,13 +15,13 @@ jobs:
   build:
     <<: *defaults
     docker:
-      - image: 8.9.4
+      - image: node:8.9.4
     steps:
       - checkout
       - run:
           name: 'Install yarn'
           command: |
-            npm install -g yarn@0.27.5
+            npm install yarn@0.27.5
       - run:
           name: 'Install Lerna'
           command: |
