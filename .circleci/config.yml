@@ -1,14 +1,7 @@
 defaults: &defaults
   working_directory: '~/project'
 
-machine:
-  pre:
-    - npm install -g lerna
-    - mkdir ~/.yarn-cache
-  node:
-    version: 8.9.4
-
-dependencies:
+dependencies: &dependencies
   pre:
     - curl -o- -L https://yarnpkg.com/install.sh | bash
   cache_directories:
@@ -19,10 +12,38 @@ dependencies:
 #########################JOBS########################################
 version: 2
 jobs:
-  checkout:
+  build:
     <<: *defaults
+    docker:
+      - image: 8.9.4
     steps:
       - checkout
+      - run:
+          name: 'Install yarn'
+          command: |
+            npm install -g yarn@0.27.5
+      - run:
+          name: 'Install Lerna'
+          command: |
+            yarn add lerna
+
+      - restore_cache:
+          keys:
+            - dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+            - dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}
+            - dependencies-{{ .Branch }}
+            - dependencies
+      - run:
+          name: 'Install Dependencies'
+          command: |
+            yarn run bootstrap
+
+      - save_cache:
+          key: dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+          paths:
+            - node_modules
+            - rocket-api/node_modules
+            - mock-api/node_modules
 
 ############################WORKFLOWS###################################
 workflows:
@@ -30,5 +51,4 @@ workflows:
 
   pipeline:
     jobs:
-      #build
-      - checkout
+      - build
