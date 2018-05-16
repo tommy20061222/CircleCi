@@ -1,0 +1,11 @@
+.DS_Store
+.idea/*
+!.idea/runConfigurations/
+!.idea/scopes/
+!.idea/inspectionProfiles/
+*.iml
+.scannerwork
+
+node_modules/
+*.log
+*lock*.json

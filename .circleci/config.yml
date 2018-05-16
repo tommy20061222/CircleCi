@@ -1,0 +1,67 @@
+defaults: &defaults
+  working_directory: '~/project'
+  docker:
+    - image: 'qldockersandboxdtr.mi.corp.rockfin.com/tru/rmapi:latest'
+
+attach_workspace: &attach_workspace
+  attach_workspace:
+    at: '.'
+
+persist_workspace: &persist_workspace
+  persist_to_workspace:
+    root: '.'
+    paths: [ '.' ]
+
+#########################JOBS########################################
+version: 2
+jobs:
+  checkout:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'dependencies-lerna-{{ checksum "yarn.lock" }}'
+            - 'dependencies-lerna-'
+      - run:
+          name: 'Install Lerna'
+          command: |
+            yarn install
+      - save_cache:
+          key: 'dependencies-lerna-{{ checksum "yarn.lock" }}'
+          paths:
+            - './node_modules'
+      - *persist_workspace
+
+  install_dependencies:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - restore_cache:
+          keys:
+            - 'dependencies-{{ checksum "yarn.lock" }}'
+            - 'dependencies-'
+      - run:
+          name: 'Yarn Install'
+          command: |
+            yarn install
+      - run:
+          name: 'Yarn Bootstrap'
+          command: |
+            yarn run bootstrap
+      - save_cache:
+          key: 'dependencies-{{ checksum "yarn.lock" }}'
+          paths:
+            - './node_modules'
+      - *persist_workspace
+############################WORKFLOWS###################################
+workflows:
+  version: 2
+
+  pipeline:
+    jobs:
+      #build
+      - checkout
+
+      - install_dependencies:
+          requires: ['checkout']

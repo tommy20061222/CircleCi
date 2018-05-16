@@ -1,0 +1,12 @@
+{
+  "license": "(ISC OR GPL-3.0)",
+  "scripts": {
+    "bootstrap": "lerna bootstrap"
+  },
+  "devDependencies": {
+    "lerna": "^2.1.2"
+  },
+  "dependencies": {
+    "gauge": "^2.7.3"
+  }
+}
