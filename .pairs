@@ -1,0 +1,7 @@
+pairs:
+  tr: Tommy Ru; tommy20061222
+email:
+  domain: gmail.com
+  prefix: pair
+  no_solo_prefix: true
+global: false

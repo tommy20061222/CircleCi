@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: '~/project'
 
-#########################JOBS########################################
+#########################JOBS#########################################
 version: 2
 jobs:
   build:
@@ -16,19 +16,19 @@ jobs:
             curl -o- -L https://yarnpkg.com/install.sh | bash
       - restore_cache:
           keys:
-            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
-            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}
-            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+            - dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}
+            - dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}
             - dependencies-{{ .Branch }}
             - dependencies
       - run:
           name: 'Install dependencies'
           command: |
-            npm install
+            yarn add lerna -D
             yarn run bootstrap
 
       - save_cache:
-          key: dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+          key: dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
           paths:
             - node_modules
             - rocket-api/node_modules
