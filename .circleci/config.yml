@@ -14,24 +14,21 @@ jobs:
           name: 'Install yarn'
           command: |
             curl -o- -L https://yarnpkg.com/install.sh | bash
-      - run:
-          name: 'Install Lerna'
-          command: |
-             yarn add lerna
-
       - restore_cache:
           keys:
-            - dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
-            - dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}
+            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}
+            - dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - dependencies-{{ .Branch }}
             - dependencies
       - run:
           name: 'Install dependencies'
           command: |
+            npm install
             yarn run bootstrap
 
       - save_cache:
-          key: dependencies-{{ .Branch }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+          key: dependencies-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
           paths:
             - node_modules
             - rocket-api/node_modules
