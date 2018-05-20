@@ -1,13 +1,12 @@
 defaults: &defaults
   working_directory: '~/project'
-
+  docker:
+        - image: node:8.9.4
 #########################JOBS#########################################
 version: 2
 jobs:
   build:
     <<: *defaults
-    docker:
-      - image: node:8.9.4
     steps:
       - checkout
       - run:
@@ -33,6 +32,13 @@ jobs:
             - node_modules
             - rocket-api/node_modules
             - mock-api/node_modules
+  echo:
+    <<: *defaults
+    steps:
+      - run:
+          name: 'echo helloworld'
+          command:
+            echo 'hello world'
 
 ############################WORKFLOWS###################################
 workflows:
