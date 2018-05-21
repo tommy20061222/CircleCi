@@ -34,9 +34,10 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: 'Install yarn'
+          name: 'Install Lerna'
           command: |
             curl -o- -L https://yarnpkg.com/install.sh | bash
+
       - restore_cache:
           keys:
             - dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
@@ -57,6 +58,29 @@ jobs:
             - rocket-api/node_modules
             - mock-api/node_modules
 
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - prod-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+            - prod-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}
+            - prod-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - prod-dependencies-{{ .Branch }}
+            - prod-dependencies
+      - run:
+          name: 'Remove Dependencies && Zip Artifacts'
+          command: |
+            yarn run clean-dev-dependencies
+
+      - save_cache:
+          key: dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+          paths:
+            - node_modules
+            - rocket-api/node_modules
+            - mock-api/node_modules
   echo:
     <<: *defaults
     steps:
