@@ -1,43 +1,18 @@
 defaults: &defaults
   working_directory: '~/project'
   docker:
-    - image: node:8.9.4
-
-persist_workspace: &persist_workspace
-  persist_to_workspace:
-    root: '.'
-    paths: [ '.' ]
-
-attach_workspace: &attach_workspace
-  attach_workspace:
-    at: '.'
-
+        - image: node:8.9.4
 #########################JOBS#########################################
 version: 2
 jobs:
-  checkout:
-    <<: *defaults
-    steps:
-      - restore_cache:
-          keys:
-            - v1-{{ .Environment.CIRCLE_SHA1 }}
-            - v1
-      - checkout
-      - save_cache:
-          key: v1-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ".git"
-      - *persist_workspace
-
   install_dependencies:
     <<: *defaults
     steps:
-      - *attach_workspace
+      - checkout
       - run:
-          name: 'Install Lerna'
+          name: 'Install yarn'
           command: |
             curl -o- -L https://yarnpkg.com/install.sh | bash
-
       - restore_cache:
           keys:
             - dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
@@ -57,12 +32,14 @@ jobs:
             - node_modules
             - rocket-api/node_modules
             - mock-api/node_modules
-
   build:
     <<: *defaults
     steps:
       - checkout
-
+      - run:
+          name: 'Install yarn'
+          command: |
+            curl -o- -L https://yarnpkg.com/install.sh | bash
       - restore_cache:
           keys:
             - prod-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
@@ -73,10 +50,11 @@ jobs:
       - run:
           name: 'Remove Dependencies && Zip Artifacts'
           command: |
+            yarn add lerna -D
             yarn run clean-dev-dependencies
 
       - save_cache:
-          key: dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
+          key: prod-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}-{{ checksum "rocket-api/yarn.lock" }}-{{ checksum "mock-api/yarn.lock"}}
           paths:
             - node_modules
             - rocket-api/node_modules
@@ -95,6 +73,5 @@ workflows:
 
   pipeline:
     jobs:
-      - checkout
-      - install_dependencies:
-          requires: ['checkout']
+      - install_dependencies
+      - build
