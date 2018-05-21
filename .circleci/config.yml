@@ -1,14 +1,38 @@
 defaults: &defaults
   working_directory: '~/project'
   docker:
-        - image: node:8.9.4
+    - image: node:8.9.4
+
+persist_workspace: &persist_workspace
+  persist_to_workspace:
+    root: '.'
+    paths: [ '.' ]
+
+attach_workspace: &attach_workspace
+  attach_workspace:
+    at: '.'
+
 #########################JOBS#########################################
 version: 2
 jobs:
-  build:
+  checkout:
     <<: *defaults
     steps:
+      - restore_cache:
+          keys:
+            - v1-{{ .Environment.CIRCLE_SHA1 }}
+            - v1
       - checkout
+      - save_cache:
+          key: v1-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ".git"
+      - *persist_workspace
+
+  install_dependencies:
+    <<: *defaults
+    steps:
+      - *attach_workspace
       - run:
           name: 'Install yarn'
           command: |
@@ -32,6 +56,7 @@ jobs:
             - node_modules
             - rocket-api/node_modules
             - mock-api/node_modules
+
   echo:
     <<: *defaults
     steps:
@@ -46,4 +71,6 @@ workflows:
 
   pipeline:
     jobs:
-      - build
+      - checkout
+      - install_dependencies:
+          requires: ['checkout']
