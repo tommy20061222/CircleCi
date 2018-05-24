@@ -71,10 +71,38 @@ jobs:
       - store_artifacts:
           path: /coverageReport
 
+  hello:
+    <<: *defaults
+    docker: [{image: 'docker:17.06-git'}]
+    steps:
+      - setup_remote_docker
+      - run:
+          name: 'docker'
+          command: |
+            docker version
+#      - run:
+#          name: Install Docker client
+#          command: |
+#              set -x
+#              VER="17.03.0-ce"
+#              curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+#              tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+#              mv /tmp/docker/* /usr/bin
+#      - run:
+#          name: Install Docker Compose
+#          command: |
+#              curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+#              chmod +x ~/docker-compose
+#              mv ~/docker-compose /usr/bin/docker-compose
+      - run:
+          name: 'sample'
+          command: |
+              docker pull node
+
 ############################WORKFLOWS###################################
 workflows:
   version: 2
 
   pipeline:
     jobs:
-     - echo
+     - hello
