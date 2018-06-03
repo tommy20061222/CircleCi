@@ -46,10 +46,44 @@ jobs:
   extra:
     <<: *defaults
     steps:
+      - *attach_workspace
       - run:
           name: 'dumb'
           command:  |
-             echo 'i am dumb'
+             ls -la
+      - *persist_workspace
+
+
+  extra_extra:
+    <<: *defaults
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: '.'
+          paths: [ 'package.json' ]
+
+#
+  extra_extra_extra:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: 'test'
+          command: |
+            rm -f package.json
+      - persist_to_workspace:
+          root: '.'
+          paths: [ 'package.json' ]
+
+
+  extra_extra_extra_extra:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - run:
+          name: 'ls'
+          command: |
+            ls -la
 
   build:
     <<: *defaults
@@ -95,6 +129,7 @@ jobs:
             mkdir /coverageReport
             cp README.md /coverageReport
       - store_artifacts:
+          root: '.'
           path: /coverageReport
 
   hello:
@@ -129,9 +164,15 @@ workflows:
 
   pipeline:
     jobs:
-     - install_dependencies
-     - build
-     - extra:
-        requires: ['install_dependencies']
-     - hello:
-        requires: ['extra', 'build']
+#     - install_dependencies
+#     - build
+#      - extra:
+#          requires: ['install_dependencies']
+#      - extra_extra:
+#          requires: ['extra']
+#      - hello:
+#        requires: ['extra', 'build']
+    - extra_extra
+    - extra_extra_extra
+    - extra_extra_extra_extra:
+        requires: ['extra_extra', 'extra_extra_extra']
